@@ -1,4 +1,4 @@
-# Project Proposal 1.0
+# Project Proposal 1.1
 
 
 
@@ -26,13 +26,16 @@
 
 ##### The main features I plan to use with my models are hour, day of week, holidays, temperature (heating and cooling demand), wind and solar forecasts, the grid operator's own load forecast, and lagged intensity.
 
-##### I plan to use the following model schemas for the data:
+##### I plan to use the following model schemas and timeline:
 
-| Model Type | Use |
---------      | -------- 
-| Clustering: | Run k-means on 24-hour daily intensity curves to find trends in day "types". |
-| SVD: | Factor a day x hour matrix to see which few patterns explain most days. |
-| Classification: | Predict whether the next hour will be "clean" (below an emissions threshold), comparing trees, Naive Bayes, and SVMs. |
-| Neural Network Regression (main model): | Predict carbon intensity directly with linear models. |
+| Task | Use | Timeline |
+|-------- | -------- | -------- |
+| Data Collection and Proposal | Fit data for models | Week 1|
+| Clustering: | Run k-means on 24-hour daily intensity curves to find trends in day "types". | Week 2 |
+| SVD: | Factor a day x hour matrix to see which few patterns explain most days. | Week 3-4 (in time for check in) |
+| Classification: | Predict whether the next hour will be "clean" (below an emissions threshold), comparing trees, Naive Bayes, and SVMs. | Week 5 |
+| Neural Network Regression (main model): | Predict carbon intensity directly with linear models. | Week 6-7 |
+| Neural Network Evaluation | Finalize model accuracy and output | Week 8-9 (in time for check in) |ß
+| Final Write Up and Visualizations | Complete project | Week 10 |
 
-##### Since we have not gone over all of these models yet in class, I don't have a full plan for them yet.
+##### Please let me know your feedback for this project as I would love to hear it. I really want to do something in relation to carbon emissions and helping the enviroment. I'd also like to hear back if you think this is too ambitous or not enough. Thank you for reading my project proposal!
