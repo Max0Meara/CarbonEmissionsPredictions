@@ -168,3 +168,14 @@ This graph shows the weight (loading) each principal component puts on each hour
 
 - PC2 (7%) is negative at night and positive during the day so it measures how a day's daytime-vs-night contrast differs from the average day's.
 
+
+## November Check In
+
+During my October check-in, it was recommended that I plot 3D PCA to show more variance so I made a 3D HTML plot. I can't embedded the file into this MD as Github does not permit it but it's listed in the figures folder in the HTML folder. Below is an image of the HTML file rendered:
+
+![3D PCA](figures/HTML/3d_plot.png)
+
+- From the graph we can see that PC3 only adds 2% of variance. So PC1–PC3 explain about 96%.
+
+- The graph also allows you hover over any point to see the exact date, hour, and intensity. Which makes identifying the type 5 spike days and the odd-shaped outlier days easy.
+

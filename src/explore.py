@@ -14,15 +14,17 @@ import pandas as pd
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.metrics import silhouette_score
+import plotly.express as px
 
-FIG = Path("figures")
-K = 5 # TODO choose from elbow.png and justify in the README
-# I'm doing 4 because 3 has the largest change so I'm doing largest change plus 1 as we learned in lecture
+ROOT = Path(__file__).resolve().parent.parent   # src/ -> project root
+FIG = ROOT / "figures"
+DATA = ROOT / "data" / "processed" / "hourly.csv"
+K = 6 # TODO choose from elbow.png and justify in the README
 NORMALIZE = False # True = subtract each day's mean
 
 
 def load_days() -> pd.DataFrame:
-    df = pd.read_csv("data/processed/hourly.csv", parse_dates=["period_utc"], index_col="period_utc")
+    df = pd.read_csv(DATA, parse_dates=["period_utc"], index_col="period_utc")
     ci = df["carbon_intensity"]
     days = ci.groupby([ci.index.date, ci.index.hour]).mean().unstack()
     days.index = pd.to_datetime(days.index)
@@ -128,17 +130,32 @@ def cluster_scatter(X, km) -> None:
     # PC2: negative at night, positive during the day. A day that is above average during the day and below average at night gets a high score. If both are above average, the two parts should partly cancel.
 
 
+def three_d_PCA(X, km, complete) -> None:
+    pca3 = PCA(n_components=3).fit(X)
+    p = pca3.transform(X)
+    v = pca3.explained_variance_ratio_
+    fig = px.scatter_3d(x=p[:, 0], y=p[:, 1], z=p[:, 2],
+                        color=km.labels_.astype(str),
+                        hover_name=complete.index.strftime("%Y-%m-%d"),
+                        labels={"x": f"PC1 ({v[0]:.0%})", "y": f"PC2 ({v[1]:.0%})", "z": f"PC3 ({v[2]:.0%})",
+                                    "color": "type"})
+    fig.update_traces(marker_size=3)
+    fig.write_html(FIG / "clusters_pca_3d.html")
+
+    
+
 def main() -> None:
     FIG.mkdir(exist_ok=True)
     days = load_days()
-    heatmap(days)
+    # heatmap(days)
     complete = days.dropna()
-    print(f"{len(complete)} complete days of {len(days)} (dropped days with missing hours)")
+    # print(f"{len(complete)} complete days of {len(days)} (dropped days with missing hours)")
     X = complete.sub(complete.mean(axis=1), axis=0) if NORMALIZE else complete
-    elbow(X)
+    # elbow(X)
     km = day_types(complete, X)
-    cluster_scatter(X, km)
-    print(f"figures saved to {FIG}/")
+    # cluster_scatter(X, km)
+    # print(f"figures saved to {FIG}/")
+    three_d_PCA(X, km, complete)
 
 
 if __name__ == "__main__":
