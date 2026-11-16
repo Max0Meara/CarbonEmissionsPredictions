@@ -1,4 +1,4 @@
-# Project Proposal 1.3
+# Project Proposal 1.4
 
 ## Intro
 
@@ -81,30 +81,90 @@ After combining the datasets, we are left with the following columns:
 | carbon_intensity | gCO2 per kWh generated this hour |
 | ne_temperature_2m | Demand weighted New England temperature (Celcius) [a temperature metric adjusted so that regions or weather stations with higher energy consumption or higher population get more weight than sparsely populated or low-energy areas] |
 | ne_wind_speed_100m | Wind at 100 m height (km/h) |
-| ne_shortwave_radiation |- Sunlight reaching the ground (W/m2) |
+| ne_shortwave_radiation | Sunlight reaching the ground (W/m2) |
 | ne_cloud_cover | Percent of sky covered |
 
 ### Figures
 
+
 #### Heat Map
 
-![Heat Map](figures/k=2_figures/heatmap.png)
+![Heat Map](figures/k=6_figures/heatmap.png)
 
-This heat map shows every hour of the three years. Date on the x-axis, hour of day (UTC) on the y-axis, color = intensity.
+This heat map shows every hour of the three years. Date on the x-axis, hour of day (UTC) on the y-axis, color = intensity. I specifically choose a heat map because it shows two time scales, daily and seasonal, in one image, which a line plot can't do for 26,000 points.
+
+- Here we can see that the stripes are vertical so whole days are clean or dirty together, so day-to-day variation matters the most.
+
+- Bright yellow spikes around Feb 2023, Jan 2025 and Dec 2025 reach about 500 g/kWh. This was unexpected but I later did more research to find that: 
+
+    - Carbon intensity measures emissions per kWh instead of total emissions. This means the day being clean or dirty comes down to what share of each hour’s power comes from fossil fuels. This is most likely caused by 4 things happening:
+
+    1. Summer demand gets filled with gas. New England uses the most electricity in summer, because of air conditioning. Nuclear (about 3.3 GW) and in-region hydro produce roughly the same amount regardless of demand, so when demand rises, gas plants cover almost all of the extra. Nuclear’s share shrinks, gas’s share grows, and intensity rises. These gas plants are also often ran with Carosine in high demand to help get the plants running faster but cause more Carbon intensity.
+
+    2. Winter heating mostly isn’t electric. Most New England homes heat with oil or gas furnaces, so electricity demand in winter rises less than in summer. ISONE is still a summer-peaking grid, which is why winter isn’t as dirty as you might expect.
+
+    3. Spring has more zero carbon supply. Snowmelt raises hydro output from roughly March through May, and wind is usually stronger in winter and spring than in summer. Combined with the low demand of the shoulder seasons, that makes spring the cleanest stretch.
+
+    4. Winter has a few outliers. On extremely cold days, natural gas pipelines prioritize home heating, gas plants run short of fuel, and oil plants come on. 
+
+- Spring is darker (cleaner); summer and fall are greener (dirtier)
 
 
+#### Choosing K
+
+![Elbow](figures/k=6_figures/elbow.png)
+
+This graph shows inertia (within-cluster squared error) and silhouette score (how well clusters separate) for k = 2 to 10. This was computed on the full 24-dimensional data.
+
+For the rest of the figures I will be choosing k = 6 given its near the pleateu of the graph.
 
 
+#### PCA Kmeans 
+
+![clusters](figures/k=6_figures/clusters_pca.png)
+
+This graph shows each day plotted by its PC1 score (overall level, 87%) and PC2 score (daytime vs. night contrast, 7%), colored by cluster, with the projected cluster centers marked. I did this by running PCA on the data and then running Kmeans with k = 6. Each dot is one day kept as 24 separate numbers, one carbon intensity value per hour (intensity (gCO₂/kWh) = Σ (generation of each fuel × that fuel’s emission factor) ÷ total generation). PCA then collapses the 24 numbers into 2 coordinates in 2D.
+
+- We can see that types 2, 0, 3, 4, and 1 are adjacent vertical bands along PC1 with no gaps between them, so k = 6 slices a continuum more finely rather than finding separate groups.
+
+- Type 5’s points are spread across PC1 ≈ 620–1120, and its center falls in empty space between them. It’s a catch-all for extreme days, not a tight group.
 
 
+#### Day Types by Month
+
+![clusters](figures/k=6_figures/day_types_month.png)
+
+This graph shows how many days of each cluster fall in each calendar month, pooled across 2023–2025. Each bar totals about 90 days.
+
+- We can see that the clean types (0 and 2) dominate January–May. Type 2, the cleanest, is concentrated in February–May.
+
+- July has no clean days at all, only types 1, 3, and 4.
+
+- The extreme type (5) appears only in December–February, which fits the winter outlier hypothesis.
+
+- October has an unexpectedly large number of type 1 days (second-dirtiest) without any AC demand to explain it. A possible cause is fall nuclear refueling outages.
 
 
+#### Daily carbon-intensity profiles
+
+![clusters](figures/k=6_figures/day_types.png)
+
+This graph plots the average 24-hour curve for each cluster, with the number of days in each.
+
+- We can see that the five clusters are roughly parallel bands of overall level, from about 170 to 335 g/kWh.
+
+- Type 2 is the exception: it has the deepest midday dip (about noon–2 pm local), so it’s the first cluster that differs in shape, likely because of spring solar.
+
+- Type 5 (6 days, about 415–450 g/kWh) isolates the spike days, so they no longer inflate the averages of the normal clusters.
 
 
+#### PCA loadings
 
+![clusters](figures/k=6_figures/day_types.png)
 
+This graph shows the weight (loading) each principal component puts on each hour. A day's PC score is a weighted sum of its centered hourly values, using these loadings as the weights.
 
+- We can see that PC1 (87%) is flat at about 0.2 for every hour so it measures the overall daily level.
 
-try k =6 
+- PC2 (7%) is negative at night and positive during the day so it measures how a day's daytime-vs-night contrast differs from the average day's.
 
-99% of variance 
